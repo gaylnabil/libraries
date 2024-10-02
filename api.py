@@ -2,27 +2,28 @@ from fastapi import FastAPI, HTTPException
 from typing import List
 from models import Book
 from uuid import UUID, uuid4
-from pymongo import MongoClient
+from pymongo import MongoClient, AsyncMongoClient
 import os
 from dotenv import load_dotenv
 
 load_dotenv()
 
+async def connection():
+    return await MongoClient(host, port)
 
-host = os.environ.get('HOST')
+host = os.environ.get('HOST', str)
 port = int(os.environ.get('PORT'))
 
-client = MongoClient(host, port)
+client = connection()
 db = client.library
 
 books = db.Books
 
 app = FastAPI()
 
+
 @app.get('/')
 async def root():
-    
-    
     return {'message': 'Hello World'}
 
 @app.get('/books/{book_id}', response_model_by_alias=Book)
@@ -41,9 +42,9 @@ async def get_books():
 
 @app.post('/books', response_model=Book)
 async def create_book(bk: Book):
-    bk.id = uuid4()
-    books.append(bk)
-    return bk
+    # bk.id = uuid4()
+    book = books.insert_one(bk)
+    return book
 
 @app.put('/books/{book_id}', response_model_by_alias=Book)
 async def update_book(book_id: UUID, book_updated: Book):
