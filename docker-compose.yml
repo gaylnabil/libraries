@@ -1,0 +1,26 @@
+  services:
+    library_fastapi:
+      image: library_fastapi_img
+      container_name: library_fastapi_c
+      build:
+        context: .
+      volumes:
+      - ./:/library
+      ports:
+        - 8000:8000
+      command: python3 api.py
+      depends_on:
+        - db
+
+    db:
+      image: mongo
+      restart: always
+      container_name: mongodb_c
+      volumes:
+          - ./mongodb:/data/db
+      ports:
+          - 27018:27017
+      environment:
+        MONGO_INITDB_DATABASE: library
+        MONGO_INITDB_ROOT_USERNAME: root
+        MONGO_INITDB_ROOT_PASSWORD: password

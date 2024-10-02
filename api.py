@@ -2,11 +2,27 @@ from fastapi import FastAPI, HTTPException
 from typing import List
 from models import Book
 from uuid import UUID, uuid4
+from pymongo import MongoClient
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
+
+host = os.environ.get('HOST')
+port = int(os.environ.get('PORT'))
+
+client = MongoClient(host, port)
+db = client.library
+
+books = db.Books
+
 app = FastAPI()
 
-books = []
 @app.get('/')
 async def root():
+    
+    
     return {'message': 'Hello World'}
 
 @app.get('/books/{book_id}', response_model_by_alias=Book)
@@ -52,4 +68,4 @@ async def delete_book(book_id: UUID):
 
 if __name__ == '__main__':
     import uvicorn
-    uvicorn.run(app, host="127.0.0.1", port=8000)
+    uvicorn.run(app, host="0.0.0.0", port=8000)
