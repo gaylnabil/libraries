@@ -12,7 +12,7 @@ book_router = APIRouter()
 async def retrieve_book(book_id: str):
     
     try:
-        if data := books.find_one(ObjectId(book_id)):
+        if data := await books.find_one(ObjectId(book_id)):
             return book_entity(data)
 
         else:
@@ -24,7 +24,7 @@ async def retrieve_book(book_id: str):
 async def get_books():
     
     try:
-        data = books.find({})
+        data = await books.find({}).to_list(None)
         return  books_entity(data)
 
     except Exception as e:
@@ -36,7 +36,7 @@ async def create_book(bk: Book):
     
     try:
 
-        response = books.insert_one(dict(bk))
+        response = await books.insert_one(dict(bk))
 
         return JSONResponse(content={
             'status_code': status.HTTP_201_CREATED,
@@ -50,12 +50,13 @@ async def update_book(book_id: str, book_updated: Book):
     
     try:
 
-        book = books.find_one({'_id': ObjectId(book_id)})
+        book = await books.find_one({'_id': ObjectId(book_id)})
         if not book:
             raise HTTPException(status_code=404, detail='The book is not found')
 
         book_updated.updated_at = datetime.now()
-        books.update_one(
+        
+        await books.update_one(
             {'_id': ObjectId(book_id)}, 
             {'$set': dict(book_updated)}
         )
@@ -71,12 +72,12 @@ async def update_book(book_id: str, book_updated: Book):
 @book_router.delete('/books/{book_id}')
 async def delete_book(book_id: str):
     
-    book = books.find_one({'_id': ObjectId(book_id)})
+    book = await books.find_one({'_id': ObjectId(book_id)})
     
     if not book:
         raise HTTPException(status_code=404, detail='The book is not found')
     
-    response = books.delete_one({'_id': ObjectId(book_id)})
+    response = await books.delete_one({'_id': ObjectId(book_id)})
     
     return JSONResponse(content={
             'status_code': status.HTTP_200_OK,
