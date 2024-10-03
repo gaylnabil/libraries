@@ -7,26 +7,12 @@ from models.book import Book
 from pymongo import MongoClient
 import os
 from dotenv import load_dotenv
-
 from schemas.entity import book_entity, books_entity
+from models.configurations import client
 
 load_dotenv()
 
-# async def connection():
-#     return await MongoClient(host, port)
-
-host = os.environ.get('HOST', str)
-port = int(os.environ.get('PORT'))
-user = os.environ.get('USERNAME', str)
-password = os.environ.get('PASSWORD', str)
-
-client = MongoClient(
-            host, 
-            port, 
-            username=user, 
-            password=password
-        )
-# client = MongoClient('mongodb://root:password@db:27018/')
+# client = MongoClient('mongodb://root:password@db:27017/')
 db = client.library
 
 books = db.Books
@@ -51,8 +37,6 @@ async def retrieve_book(book_id: str):
     
     except Exception as e:
         raise HTTPException(status_code=404, detail=f'Error: {e}')
-
-    return HTTPException(status_code=404, detail=f'the book is not found')
     
 @router.get("/books/")
 async def get_books():
@@ -89,10 +73,9 @@ async def update_book(book_id: str, book_updated: Book):
             raise HTTPException(status_code=404, detail='The book is not found')
 
         book_updated.updated_at = datetime.now()
-        book_updated = dict(book_updated)
         books.update_one(
             {'_id': ObjectId(book_id)}, 
-            {'$set': book_updated}
+            {'$set': dict(book_updated)}
         )
         
         return JSONResponse(content={
@@ -105,7 +88,9 @@ async def update_book(book_id: str, book_updated: Book):
 
 @router.delete('/books/{book_id}')
 async def delete_book(book_id: str):
+    
     book = books.find_one({'_id': ObjectId(book_id)})
+    
     if not book:
         raise HTTPException(status_code=404, detail='The book is not found')
     
