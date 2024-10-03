@@ -4,18 +4,8 @@ from fastapi import FastAPI, APIRouter, HTTPException, status
 from typing import List
 from fastapi.responses import JSONResponse
 from models.book import Book
-from pymongo import MongoClient
-import os
-from dotenv import load_dotenv
 from schemas.entity import book_entity, books_entity
-from models.configurations import client
-
-load_dotenv()
-
-# client = MongoClient('mongodb://root:password@db:27017/')
-db = client.library
-
-books = db.Books
+from models.configurations import books
 
 app = FastAPI()
 router = APIRouter()
@@ -23,11 +13,12 @@ router = APIRouter()
 
 @router.get('/')
 async def root():
+    
     return {'Location': '/docs'}
 
 @router.get('/books/{book_id}')
 async def retrieve_book(book_id: str):
-
+        
     try:
 
         data = books.find_one(ObjectId(book_id))
