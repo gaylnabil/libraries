@@ -2,7 +2,7 @@ from datetime import datetime
 from bson.objectid import ObjectId
 from fastapi import FastAPI, APIRouter, HTTPException, status
 from typing import List
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, RedirectResponse
 from models.book import Book
 from schemas.entity import book_entity, books_entity
 from models.configurations import books
@@ -14,7 +14,7 @@ router = APIRouter()
 @router.get('/')
 async def root():
     
-    return {'Location': '/docs'}
+    return RedirectResponse(url='/docs', status_code=status.HTTP_307_TEMPORARY_REDIRECT)
 
 @router.get('/books/{book_id}')
 async def retrieve_book(book_id: str):
