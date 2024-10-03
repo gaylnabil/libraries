@@ -1,71 +1,123 @@
-from fastapi import FastAPI, HTTPException
+from datetime import datetime
+from bson.objectid import ObjectId
+from fastapi import FastAPI, APIRouter, HTTPException, status
 from typing import List
-from models import Book
-from uuid import UUID, uuid4
-from pymongo import MongoClient, AsyncMongoClient
+from fastapi.responses import JSONResponse
+from models.book import Book
+from pymongo import MongoClient
 import os
 from dotenv import load_dotenv
 
+from schemas.entity import book_entity, books_entity
+
 load_dotenv()
 
-async def connection():
-    return await MongoClient(host, port)
+# async def connection():
+#     return await MongoClient(host, port)
 
 host = os.environ.get('HOST', str)
 port = int(os.environ.get('PORT'))
+user = os.environ.get('USERNAME', str)
+password = os.environ.get('PASSWORD', str)
 
-client = connection()
+client = MongoClient(
+            host, 
+            port, 
+            username=user, 
+            password=password
+        )
+# client = MongoClient('mongodb://root:password@db:27018/')
 db = client.library
 
 books = db.Books
 
 app = FastAPI()
+router = APIRouter()
 
 
-@app.get('/')
+@router.get('/')
 async def root():
-    return {'message': 'Hello World'}
+    return {'Location': '/docs'}
 
-@app.get('/books/{book_id}', response_model_by_alias=Book)
-async def retrieve_book(book_id: UUID):
+@router.get('/books/{book_id}')
+async def retrieve_book(book_id: str):
 
-    for bk in books:
-        if bk.id == book_id:
-            return bk
+    try:
+
+        data = books.find_one(ObjectId(book_id))
+        if not data:
+            raise HTTPException(status_code=404, detail='The book is not found')
+        return book_entity(data)
+    
+    except Exception as e:
+        raise HTTPException(status_code=404, detail=f'Error: {e}')
 
     return HTTPException(status_code=404, detail=f'the book is not found')
     
-@app.get("/books", response_model=List[Book])
+@router.get("/books/")
 async def get_books():
-    return books
+    
+    try:
+        data = books.find({})
+        return  books_entity(data)
+    
+    except Exception as e:
+        raise HTTPException(status_code=404, detail=f'Error: {e}')
 
 
-@app.post('/books', response_model=Book)
+@router.post('/books/', status_code=status.HTTP_201_CREATED)
 async def create_book(bk: Book):
-    # bk.id = uuid4()
-    book = books.insert_one(bk)
-    return book
-
-@app.put('/books/{book_id}', response_model_by_alias=Book)
-async def update_book(book_id: UUID, book_updated: Book):
     
-    for idx, bk in enumerate(books):
-        if bk.id == book_id:
-            book_updated = bk.copy(update=book_updated.dict(exclude_unset=True))
-            books[idx] = book_updated
-            return book_updated
+    try:
+        
+        response = books.insert_one(dict(bk))
 
-    return HTTPException(status_code=404, detail=f'the book is not found')
+        return JSONResponse(content={
+            'status_code': status.HTTP_201_CREATED,
+            'id': str(response.inserted_id)
+        })
+    except Exception as e:
+        raise HTTPException(status_code=404, detail=f'Error: {e}')
 
-@app.delete('/books/{id}')
-async def delete_book(book_id: UUID):
+@router.put('/books/{book_id}')
+async def update_book(book_id: str, book_updated: Book):
     
-    for bk in books:
-        if bk.id == book_id:
-            books.remove(bk)
-            return books
-            
-    return HTTPException(status_code=404, detail=f'the book is not found')
+    try:
+        
+        book = books.find_one({'_id': ObjectId(book_id)})
+        if not book:
+            raise HTTPException(status_code=404, detail='The book is not found')
+
+        book_updated.updated_at = datetime.now()
+        book_updated = dict(book_updated)
+        books.update_one(
+            {'_id': ObjectId(book_id)}, 
+            {'$set': book_updated}
+        )
+        
+        return JSONResponse(content={
+            'status_code': status.HTTP_200_OK,
+            'Message': "Book updated successfully"
+        })
+
+    except Exception as e:
+        raise HTTPException(status_code=404, detail=f'Error: {e}')
+
+@router.delete('/books/{book_id}')
+async def delete_book(book_id: str):
+    book = books.find_one({'_id': ObjectId(book_id)})
+    if not book:
+        raise HTTPException(status_code=404, detail='The book is not found')
+    
+    response = books.delete_one({'_id': ObjectId(book_id)})
+    
+    return JSONResponse(content={
+            'status_code': status.HTTP_200_OK,
+            'Message': "Book deleted successfully"
+        })
+
+app.include_router(router)
+
 
 if __name__ == '__main__':
     import uvicorn
