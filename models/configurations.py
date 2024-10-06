@@ -1,24 +1,38 @@
 import os
 import motor.motor_asyncio as motor
 from dotenv import load_dotenv
-from pymongo import MongoClient
+from fastapi import HTTPException
 
-load_dotenv()
+"""
+Configure and initialize the MongoDB connection.
 
-host = os.environ.get('HOST', str)
-port = int(os.environ.get('PORT'))
-user = os.environ.get('USERNAME', str)
-password = os.environ.get('PASSWORD', str)
+This function loads environment variables, sets up the MongoDB connection parameters,
+and initializes the client, database, and collection objects.
 
-# client = MongoClient(
-#             host, 
-#             port, 
-#             username=user, 
-#             password=password
-#         )
+Returns:
+    tuple: A tuple containing the following elements:
+        - client (motor.AsyncIOMotorClient): The MongoDB client object.
+        - db (motor.AsyncIOMotorDatabase): The database object.
+        - books (motor.AsyncIOMotorCollection): The 'Books' collection object.
 
-client = motor.AsyncIOMotorClient(f'mongodb://{user}:{password}@{host}:{port}/')
+Raises:
+    ValueError: If required environment variables are missing or invalid.
+"""
+try:
+    load_dotenv()
 
-db = client.library
+    host = os.environ.get('HOST', str)
+    port = int(os.environ.get('PORT'))
+    user = os.environ.get('USERNAME', str)
+    password = os.environ.get('PASSWORD', str)
 
-books = db.Books
+    # if not all([host, port, user, password]):
+    #     raise HTTPException(status_code=404, detail=f'Error: Missing or invalid environment variables')
+
+    client = motor.AsyncIOMotorClient(f'mongodb://{user}:{password}@{host}:{port}/')
+
+    db = client.library
+
+    books = db.Books
+except Exception as e:
+    raise HTTPException(status_code=404, detail=f'Error: Missing or invalid environment variables, {e}') from e

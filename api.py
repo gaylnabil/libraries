@@ -7,6 +7,7 @@ app.include_router(book_router)
 
 @app.get('/')
 async def root():
+    # Redirect to docs
     return RedirectResponse(url='/docs', status_code=status.HTTP_307_TEMPORARY_REDIRECT)
 
 
