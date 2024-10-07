@@ -22,7 +22,7 @@ try:
     load_dotenv()
 
     host = os.environ.get('HOST', str)
-    port = int(os.environ.get('PORT'))
+    port = os.environ.get('PORT', int)
     user = os.environ.get('USERNAME', str)
     password = os.environ.get('PASSWORD', str)
 

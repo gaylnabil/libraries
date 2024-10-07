@@ -5,7 +5,7 @@
 # This should contain all files created during `npm run build`.
 build
 node_modules
-venv/
+FastAPI/venv/
 
 # Django #
 *.log
@@ -106,10 +106,10 @@ celerybeat-schedule.*
 *.sage.py 
 
 # Environments 
-.env 
+FastAPI/.env
 .venv 
 env/ 
-venv/ 
+FastAPI/venv/
 ENV/ 
 env.bak/ 
 venv.bak/ 

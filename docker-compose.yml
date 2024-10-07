@@ -3,9 +3,10 @@
       image: library_fastapi_img
       container_name: library_fastapi_c
       build:
-        context: .
+        context: FastAPI/.
+        dockerfile: Dockerfile
       volumes:
-      - ./:/library
+      - ./FastAPI:/library
       ports:
         - 8000:8000
       command: python3 api.py
