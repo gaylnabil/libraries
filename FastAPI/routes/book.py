@@ -2,10 +2,9 @@ from datetime import datetime
 from bson import ObjectId
 from fastapi import APIRouter, HTTPException, status
 from fastapi.responses import JSONResponse
-from models.book import Book
-from schemas.entity import book_entity, books_entity
 from models.configurations import books
-
+from schemas.entity import books_entity, book_entity
+from models.book import Book
 
 # This router handle all the CRUD operations for books
 # including retrieving, creating, updating and deleting

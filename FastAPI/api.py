@@ -1,7 +1,8 @@
 from fastapi import FastAPI, status
 from fastapi.responses import RedirectResponse
 from routes.book import book_router
-
+import sys
+sys.path.append("..")
 app = FastAPI()
 app.include_router(book_router)
 
