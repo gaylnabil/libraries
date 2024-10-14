@@ -6,7 +6,7 @@ ENV PYTHONUNBUFFERED 1
 ENV PYTHONDONTWRITEBYTECODE 1
 
 # Working directory 
-WORKDIR /library
+WORKDIR /FastAPI
 
 # install dependencies  
 RUN pip install --upgrade pip 

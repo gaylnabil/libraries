@@ -24,5 +24,6 @@ class Book(BaseModel):
     author: str
     description: Optional[str]
     published: int
+    quantity: int
     created_at: datetime = datetime.now()
     updated_at: datetime = datetime.now()
