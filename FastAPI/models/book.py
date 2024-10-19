@@ -25,5 +25,5 @@ class Book(BaseModel):
     description: Optional[str]
     published: int
     quantity: int
-    created_at: datetime = datetime.now()
-    updated_at: datetime = datetime.now()
+    created_at: datetime = Field(default_factory=datetime.now)
+    updated_at: datetime = Field(default_factory=datetime.now)

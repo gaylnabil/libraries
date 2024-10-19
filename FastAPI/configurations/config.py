@@ -21,10 +21,10 @@ Raises:
 try:
     load_dotenv()
 
-    host = os.environ.get('HOST', str)
-    port = os.environ.get('PORT', int)
-    user = os.environ.get('USERNAME', str)
-    password = os.environ.get('PASSWORD', str)
+    host = os.environ.get('MONGO_HOST', str)
+    port = os.environ.get('MONGO_PORT', int)
+    user = os.environ.get('MONGO_USERNAME', str)
+    password = os.environ.get('MONGO_PASSWORD', str)
 
     # if not all([host, port, user, password]):
     #     raise HTTPException(status_code=404, detail=f'Error: Missing or invalid environment variables')
@@ -34,5 +34,7 @@ try:
     db = client.library
 
     books = db.Books
+    orders = db.Orders
+
 except Exception as e:
     raise HTTPException(status_code=404, detail=f'Error: Missing or invalid environment variables, {e}') from e
