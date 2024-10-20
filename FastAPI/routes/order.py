@@ -43,11 +43,8 @@ async def get_order(order_id: str):
 @order_router.post("/orders")
 async def create_order(order: Order):
     try:
-        p = KafkaProducer(KAFKA_BROKER)
-        p.send_message(KAFKA_TOPIC, message = {"book_id": order.book_id, "quantity": order.quantity})
-        p.commit()
-        p.close()
-
+        p = KafkaProducer(KAFKA_BROKER, group_id="order-group")
+        p.send_message(KAFKA_TOPIC, message = {"key": order.book_id, "quantity": order.quantity})
         response = await orders.insert_one(dict(order))
         return JSONResponse(content={
             "status_code": status.HTTP_201_CREATED,

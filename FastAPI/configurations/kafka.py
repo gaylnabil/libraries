@@ -9,13 +9,14 @@ class KafkaProducer:
     bootstrap_servers (str): The bootstrap servers for the Kafka producer.
     producer (Producer): The Kafka producer object.
     """
-    def __init__(self, bootstrap_servers):
+    def __init__(self, bootstrap_servers, group_id=None):
 
         self.bootstrap_servers = bootstrap_servers
         self.admin = KafkaAdmin(bootstrap_servers=self.bootstrap_servers)
 
-        self.producer = Producer(config={
-            'bootstrap_servers': self.bootstrap_servers,
+        self.producer = Producer({
+            'bootstrap.servers': self.bootstrap_servers,
+            'group.id': group_id,
             'auto.offset.reset': 'earliest'
         })
 
@@ -26,7 +27,7 @@ class KafkaProducer:
 
         try:
             self.admin.create_topic(topic)
-            self.producer.produce(topic, message.encode('utf-8'))
+            self.producer.produce(topic, bytes(str(message), 'utf-8'))
             self.commit()
         except Exception as e:
             raise KafkaException(e)

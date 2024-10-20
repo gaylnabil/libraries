@@ -18,9 +18,8 @@ async def root():
     return RedirectResponse(url='/docs', status_code=status.HTTP_307_TEMPORARY_REDIRECT)
 
 
-
-if __name__ == '__main__':
-    import uvicorn
-    fastapi_host = os.environ.get('FASTAPI_HOST', str)
-    fastapi_port = int(os.environ.get('FASTAPI_PORT', str))
-    uvicorn.run(app, host=fastapi_host, port=fastapi_port)
+# if __name__ == '__main__':
+#     import uvicorn
+#     fastapi_host = os.environ.get('FASTAPI_HOST', str)
+#     fastapi_port = int(os.environ.get('FASTAPI_PORT', str))
+#     uvicorn.run(app, host=fastapi_host, port=fastapi_port)

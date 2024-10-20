@@ -9,7 +9,7 @@
       - ./FastAPI:/FastAPI
       ports:
         - "8000:8000"
-      command: python3 api.py
+      command: uvicorn api:app --host 0.0.0.0 --port 8000
       depends_on:
         - db
 
@@ -18,7 +18,7 @@
       restart: always
       container_name: mongodb_c
       volumes:
-          - ./mongodb:/data/db
+          - ./mongodb:/order/db
       ports:
           - "27017:27017"
       environment:
@@ -57,7 +57,7 @@
       container_name: kafka-ui
       image: provectuslabs/kafka-ui:latest
       ports:
-        - 8080:8080
+        - "8080:8080"
       environment:
         DYNAMIC_CONFIG_ENABLED: false
       depends_on:

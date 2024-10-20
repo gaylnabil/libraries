@@ -6,13 +6,15 @@ class KafkaAdmin:
         self.admin_client = AdminClient({"bootstrap.servers": bootstrap_servers})
 
     def get_topics(self, topic=None):
+        nabil = self.admin_client.list_topics(topic)
+        print(nabil.topics)
         return self.admin_client.list_topics(topic)
 
     def get_one_topic(self, topic):
         return self.get_topics([topic])
 
     def is_topic_exists(self, topic):
-        return topic in self.get_topics().keys()
+        return topic in self.get_topics().topics.keys()
 
     def delete_topic(self, topic):
         if not self.is_topic_exists(topic):

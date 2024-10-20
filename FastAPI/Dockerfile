@@ -18,4 +18,4 @@ RUN pip install -r requirements.txt
 # port where the FastAPI app runs  
 EXPOSE 8000  
 
-CMD ["python3", "api.py"]
+CMD ["uvicorn", "api:app", "--host", "0.0.0.0", "--port", "8000"]
