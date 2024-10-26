@@ -1,6 +1,8 @@
 from fastapi import FastAPI, status
 from fastapi.responses import RedirectResponse
 
+from configurations.logger import logger
+from seeds.book import seed_router
 from routes.book import book_router
 from routes.order import order_router
 import os
@@ -8,15 +10,17 @@ from dotenv import load_dotenv
 # import sys
 # sys.path.append("..")
 
+logger.info("Starting API...", stacklevel=2)
 load_dotenv()
-app = FastAPI()
-app.include_router(book_router)
-app.include_router(order_router)
+
+app = FastAPI(title="Library API", version="0.0.1")
 @app.get('/')
 async def root():
     # Redirect to docs
     return RedirectResponse(url='/docs', status_code=status.HTTP_307_TEMPORARY_REDIRECT)
-
+app.include_router(book_router)
+app.include_router(order_router)
+app.include_router(seed_router)
 
 # if __name__ == '__main__':
 #     import uvicorn

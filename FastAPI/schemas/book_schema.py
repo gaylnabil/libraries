@@ -7,6 +7,7 @@ def book_entity(book):
         "author": book['author'],
         "description": book['description'],
         "published": book['published'],
+        "quantity": book['quantity'],
         "created_at": book['created_at'],
         "updated_at": book['updated_at']
     }

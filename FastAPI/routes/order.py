@@ -21,10 +21,9 @@ order_router = APIRouter()
 @order_router.get("/orders")
 async def get_orders():
     try:
-        if data := await orders.find({}).to_list(None):
-            return orders_entity(data)
-        else:
-            raise HTTPException(status_code=404, detail="The order is not found")
+        data = await orders.find({}).to_list(None)
+        return orders_entity(data)
+
     except Exception as e:
         raise HTTPException(status_code=404, detail=f"Error: {e}") from e
 
@@ -43,7 +42,7 @@ async def get_order(order_id: str):
 @order_router.post("/orders")
 async def create_order(order: Order):
     try:
-        p = KafkaProducer(KAFKA_BROKER, group_id="order-group")
+        p = KafkaProducer(KAFKA_BROKER)
         p.send_message(KAFKA_TOPIC, message = {"key": order.book_id, "quantity": order.quantity})
         response = await orders.insert_one(dict(order))
         return JSONResponse(content={

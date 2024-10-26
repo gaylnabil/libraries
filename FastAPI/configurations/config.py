@@ -32,7 +32,6 @@ try:
     client = motor.AsyncIOMotorClient(f'mongodb://{user}:{password}@{host}:{port}/')
 
     db = client.library
-
     books = db.Books
     orders = db.Orders
 
