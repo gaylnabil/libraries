@@ -9,15 +9,13 @@ class KafkaProducer:
     bootstrap_servers (str): The bootstrap servers for the Kafka producer.
     producer (Producer): The Kafka producer object.
     """
-    def __init__(self, bootstrap_servers, group_id=None):
+    def __init__(self, bootstrap_servers):
 
         self.bootstrap_servers = bootstrap_servers
         self.admin = KafkaAdmin(bootstrap_servers=self.bootstrap_servers)
 
         self.producer = Producer({
-            'bootstrap.servers': self.bootstrap_servers,
-            'group.id': group_id,
-            'auto.offset.reset': 'earliest'
+            'bootstrap.servers': self.bootstrap_servers
         })
 
     def __str__(self):

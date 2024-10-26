@@ -1,6 +1,7 @@
+from contextlib import asynccontextmanager
 from datetime import datetime
 from bson import ObjectId
-from fastapi import APIRouter, HTTPException, status
+from fastapi import FastAPI, APIRouter, HTTPException, status
 from fastapi.responses import JSONResponse
 from models.book import Book
 from configurations.config import books
@@ -8,7 +9,19 @@ from schemas.book_schema import book_entity, books_entity
 
 # This router handle all the CRUD operations for books
 # including retrieving, creating, updating and deleting
-book_router = APIRouter()
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    print("Nabil Book CSV : Enter")
+    # await read_csv('books.csv')
+    yield
+    print("Gayl Book : Exit")
+    await shutdown()
+
+book_router = APIRouter(lifespan=lifespan)
+# book_router.lifespan_context = lifespan
+
+async def shutdown():
+    print("Shutting down...")
 
 @book_router.get('/books/{book_id}')
 async def retrieve_book(book_id: str):
