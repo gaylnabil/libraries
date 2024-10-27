@@ -1,7 +1,7 @@
 # convert a single book document to a JSON serializable dictionary
 def book_entity(book):
     return {
-        "id": str(book['_id']),
+        "_id": (book['_id']),
         "isbn": book['isbn'],
         "title": book['title'],
         "author": book['author'],

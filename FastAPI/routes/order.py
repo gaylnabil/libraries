@@ -10,6 +10,7 @@ from configurations.config import orders
 from schemas.order_schema import order_entity, orders_entity
 from fastapi.responses import JSONResponse
 from configurations.kafka import KafkaProducer
+from configurations.logger import logger
 
 load_dotenv()
 KAFKA_BROKER = os.getenv("KAFKA_BROKER", str)
@@ -22,6 +23,7 @@ order_router = APIRouter()
 async def get_orders():
     try:
         data = await orders.find({}).to_list(None)
+        logger.info("find all orders successfully", stacklevel=2)
         return orders_entity(data)
 
     except Exception as e:

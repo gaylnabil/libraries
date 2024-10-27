@@ -1,6 +1,5 @@
-from typing import Optional
 from bson import ObjectId
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 from typing import Optional
 # from uuid import UUID
 from datetime import datetime
@@ -19,6 +18,7 @@ class Book(BaseModel):
     created_at (datetime): The timestamp of when the book was created. Defaults to the current time.
     updated_at (datetime): The timestamp of when the book was last updated. Defaults to the current time.
     """
+    model_config = ConfigDict(arbitrary_types_allowed=True)
     isbn: str
     title: str
     author: str

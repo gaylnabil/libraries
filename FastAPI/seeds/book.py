@@ -4,6 +4,7 @@ from fastapi.responses import JSONResponse
 from models.book import Book
 from configurations.config import books
 from motor.motor_asyncio import AsyncIOMotorCollection
+from configurations.logger import logger
 
 seed_router = APIRouter()
 
@@ -39,7 +40,10 @@ async def write_books():
         data = await books.find({}).to_list(None)
         write_csv('books.csv', data)
     except Exception as e:
+        logger.error(f"Error: {e}", stacklevel=2)
         raise HTTPException(status_code=404, detail=f"Error: {e}") from e
+
+    logger.info("Books are written in csv file successfully", stacklevel=2)
 
     return JSONResponse(content={
             'status_code': status.HTTP_201_CREATED,
@@ -50,7 +54,9 @@ async def write_books():
 async def read_books():
     try:
         await read_csv('books.csv',  books)
+        logger.info("Books are read from csv file successfully", stacklevel=2)
     except Exception as e:
+        logger.error(f"Error: {e}", stacklevel=2)
         raise HTTPException(status_code=404, detail=f"Error: {e}") from e
 
     return JSONResponse(content={
