@@ -1,23 +1,34 @@
-import  logging
 import sys
-from functools import reduce
+import logging
+from logging.handlers import RotatingFileHandler
 
 
 class LibraryLogger:
     def __init__(self, name: str):
         # logging.setLoggerClass(LibraryLogger)
         self.logger = logging.getLogger(name)
+        filename = 'logs/app.log'
         # custom formatter
         formatter = logging.Formatter(
-            fmt='%(asctime)s.%(msecs)03d - %(levelname)s - %(module)s - %(func_name)s: %(message)s',
+            fmt='%(asctime)s.%(msecs)03d - %(levelname)s - %(module)s - %(func_name)s: %(message)s, Line:%(lineno)d',
             datefmt="%Y-%m-%d %H:%M:%S"
         )
         # create handlers
-        file_handler = logging.FileHandler('logs/app.log')
-        file_handler.setFormatter(formatter)
+        # file_handler = logging.FileHandler(filename)
+        # file_handler.setFormatter(formatter)
+        # self.logger.addHandler(file_handler)
 
-        self.logger.addHandler(file_handler)
-
+        # create rotating file handler
+        rotating_file_handler = RotatingFileHandler(
+            filename=filename,
+            mode='a',
+            maxBytes=1024,
+            backupCount=1,
+            encoding='utf-8',
+            delay=False
+        )
+        rotating_file_handler.setFormatter(formatter)
+        self.logger.addHandler(rotating_file_handler)
         # create stream handlers
         stream_handler = logging.StreamHandler(sys.stdout)
         stream_handler.setFormatter(formatter)

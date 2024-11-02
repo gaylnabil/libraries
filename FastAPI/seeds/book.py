@@ -38,7 +38,7 @@ async def read_csv(filename: str, books: AsyncIOMotorCollection):
 async def write_books():
     try:
         data = await books.find({}).to_list(None)
-        write_csv('books.csv', data)
+        write_csv('orders.csv', data)
     except Exception as e:
         logger.error(f"Error: {e}", stacklevel=2)
         raise HTTPException(status_code=404, detail=f"Error: {e}") from e
@@ -53,7 +53,7 @@ async def write_books():
 @seed_router.post("/books/seeds/read_from")
 async def read_books():
     try:
-        await read_csv('books.csv',  books)
+        await read_csv('orders.csv',  books)
         logger.info("Books are read from csv file successfully", stacklevel=2)
     except Exception as e:
         logger.error(f"Error: {e}", stacklevel=2)
