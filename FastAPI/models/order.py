@@ -10,7 +10,7 @@ class Order(BaseModel):
     last_name (str): The last name of the customer.
     email (str): The email address of the customer.
     book_id (str): The id of the book ordered.
-    quantity (int): The number of books ordered.
+    quantity (int): The number of orders ordered.
     created_at (datetime): The timestamp of when the order was created. Defaults to the current time.
     updated_at (datetime): The timestamp of when the order was last updated. Defaults to the current time.
     """

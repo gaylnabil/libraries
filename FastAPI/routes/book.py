@@ -1,32 +1,19 @@
 import json
 from contextlib import asynccontextmanager
 from datetime import datetime
-from logging.config import fileConfig
-
-from bson import ObjectId, json_util
+from bson import ObjectId
 from fastapi import FastAPI, APIRouter, HTTPException, status
-from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
 from models.book import Book
-from configurations.config import books
-from schemas.book_schema import book_entity, books_entity
-
 from configurations.logger import logger
+from services.book import book_service
 
-from schemas.serialize import Serializer
-
-
-class JSONEncoder(json.JSONEncoder):
-    def default(self, o):
-        if isinstance(o, ObjectId):
-            return str(o)
-        return json.JSONEncoder.default(self, o)
-# This router handle all the CRUD operations for books
+# This router handle all the CRUD operations for orders
 # including retrieving, creating, updating and deleting
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     print("Nabil Book CSV : Enter")
-    # await read_csv('books.csv')
+    # await read_csv('orders.csv')
     yield
     print("Gayl Book : Exit")
     await shutdown()
@@ -37,50 +24,49 @@ book_router = APIRouter(lifespan=lifespan)
 async def shutdown():
     print("Shutting down...")
 
+# RETRIEVE /orders/{book_id}
 @book_router.get('/books/{book_id}', status_code=status.HTTP_200_OK)
-async def retrieve_book(book_id: str):
+async def retrieve_book_by_id(book_id: str) -> JSONResponse:
 
     try:
-        if book := await books.find_one(ObjectId(book_id)):
+        response = await book_service.find_by_id(book_id)
+        if response.status_code == status.HTTP_200_OK:
+            logger.info('Retrieved the book: %s', response.data, func_name=retrieve_book_by_id.__name__)
+            return response.data
 
-            serialize_data = Serializer(book)
-            book = serialize_data.deserialize()
-            logger.info('Retrieved the book: %s', book, func_name=retrieve_book.__name__)
+        logger.error('The book is not found', func_name=retrieve_book_by_id.__name__)
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='The book is not found')
 
-            return book
-
-        else:
-            logger.error('The book is not found', func_name=retrieve_book.__name__)
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='The book is not found')
     except Exception as e:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f'Error: {e}') from e
 
+# GET /orders
 @book_router.get("/books/", status_code=status.HTTP_200_OK)
-async def get_books():
-
+async def get_books() -> JSONResponse:
     try:
-        data = await books.find({}).to_list(None)
-        logger.info("find all books successfully", func_name=get_books.__name__)
-        serialize_data = Serializer(data)
-        return serialize_data.deserialize()
+        response = await book_service.find_all()
+        if response.status_code == status.HTTP_200_OK:
+            logger.info("Retrieved all orders successfully", func_name=get_books.__name__)
+            return response.data
 
+        logger.error("The orders are not found", func_name=get_books.__name__)
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='The orders are not found')
     except Exception as e:
-        logger.error(f"Error: {e}", stacklevel=2)
+        logger.error(f"Error: {e}", func_name=get_books.__name__)
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f'Error: {e}') from e
 
-
+# POST /orders
 @book_router.post('/books/', response_model=Book, status_code=status.HTTP_201_CREATED)
 async def create_book(bk: Book):
 
     try:
-        serialize_data = Serializer(bk)
-        response = await books.insert_one(serialize_data.serialize())
-
-        if response.acknowledged:
+        response = await book_service.create(bk)
+        if response.status_code == status.HTTP_201_CREATED:
             logger.info("Book created successfully, status code: %s, Id: %s", status.HTTP_201_CREATED, response.inserted_id, func_name=create_book.__name__)
             return JSONResponse(content={
                 'status_code': status.HTTP_201_CREATED,
-                'id': str(response.inserted_id)
+                'message':  response.message,
+                'inserted_id': response.inserted_id
             })
 
         logger.error("Book not created", func_name=create_book.__name__)
@@ -90,28 +76,17 @@ async def create_book(bk: Book):
         logger.error(f"Error: {e}", func_name=create_book.__name__)
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f'Error: {e}') from e
 
+# PUT /orders/{book_id}
 @book_router.put('/books/{book_id}', response_model=Book, status_code=status.HTTP_200_OK)
-async def update_book(book_id: str, book_updated: Book):
+async def update_book(book_id: str, book_updated: Book) -> JSONResponse:
 
     try:
-
-        book = await books.find_one({'_id': ObjectId(book_id)})
-        if not book:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='The book is not found')
-
-        book_updated.updated_at = datetime.now()
-
-        serialize_data = Serializer(book_updated)
-        response = await books.update_one(
-            {'_id': ObjectId(book_id)},
-            {'$set': serialize_data.serialize()}
-        )
-
-        if response.acknowledged:
-            logger.info("Book updated successfully, status code: %s, Id: %s", status.HTTP_200_OK, book_id, func_name=update_book.__name__)
+        response = await book_service.update(book_id, book_updated)
+        if response.status_code == status.HTTP_204_NO_CONTENT:
+            logger.info("Book updated successfully, status code: %s, Id: %s", status.HTTP_204_NO_CONTENT, book_id, func_name=update_book.__name__)
             return JSONResponse(content={
-                'status_code': status.HTTP_200_OK,
-                'id': str(response.inserted_id)
+                'status_code': status.HTTP_204_NO_CONTENT,
+                'message':  response.message,
             })
 
         logger.error("Book not updated", func_name=update_book.__name__)
@@ -121,22 +96,28 @@ async def update_book(book_id: str, book_updated: Book):
         logger.error(f"Error: {e}", func_name=update_book.__name__)
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f'Error: {e}') from e
 
+# DELETE /orders/{book_id}
 @book_router.delete('/books/{book_id}')
-async def delete_book(book_id: str):
+async def delete_book(book_id: str) -> JSONResponse:
 
     try:
-        book = await books.find_one({'_id': ObjectId(book_id)})
-        if not book:
+        response = await book_service.find_by_id(book_id)
+
+        if response.status_code != status.http.HTTP_204_NO_CONTENT:
             logger.error(f"The book is not found, %s", status.HTTP_400_BAD_REQUEST, func_name=delete_book.__name__)
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='The book is not found')
 
-        await books.delete_one({'_id': ObjectId(book_id)})
+        response = await book_service.delete({'_id': ObjectId(book_id)})
 
-        logger.info("Book deleted successfully, status code: %s, Id: %s", status.HTTP_200_OK, book_id, func_name=delete_book.__name__)
-        return JSONResponse(content={
-            'status_code': status.HTTP_200_OK,
-            'Message': "Book deleted successfully"
-        })
+        if response.status_code == status.HTTP_200_OK:
+            logger.info("Book deleted successfully, status code: %s, Id: %s", status.HTTP_200_OK, book_id, func_name=delete_book.__name__)
+            return JSONResponse(content={
+                'status_code': status.HTTP_200_OK,
+                'message': response.message,
+            })
+
+        logger.error("Book not deleted", func_name=delete_book.__name__)
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Book not deleted')
 
     except Exception as e:
         logger.error(f"Error: {e}", func_name=delete_book.__name__)

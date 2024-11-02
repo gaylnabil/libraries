@@ -13,7 +13,7 @@ Returns:
     tuple: A tuple containing the following elements:
         - client (motor.AsyncIOMotorClient): The MongoDB client object.
         - db (motor.AsyncIOMotorDatabase): The database object.
-        - books (motor.AsyncIOMotorCollection): The 'Books' collection object.
+        - orders (motor.AsyncIOMotorCollection): The 'Books' collection object.
 
 Raises:
     ValueError: If required environment variables are missing or invalid.
