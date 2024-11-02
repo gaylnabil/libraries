@@ -5,15 +5,12 @@ from configurations.logger import logger
 from seeds.book import seed_router
 from routes.book import book_router
 from routes.order import order_router
-import os
 from dotenv import load_dotenv
-# import sys
-# sys.path.append("..")
 
-logger.info("Starting API...", stacklevel=2)
+logger.info("Starting API...", func_name=__name__)
 load_dotenv()
 
-app = FastAPI(title="Library API", version="0.0.1")
+app = FastAPI(title="Library API", version="1.0.1")
 @app.get('/')
 async def root():
     # Redirect to docs
