@@ -94,7 +94,7 @@ class OrderService:
 
     async def update(self, order_id: str, order_updated: Order) -> Response:
         try:
-            response = await self.find_by_id(order_id)
+            response: Response = await self.find_by_id(order_id)
             if response.status_code == status.HTTP_404_NOT_FOUND:
                 return response
             order_updated.updated_at = datetime.now()

@@ -22,7 +22,7 @@ class LibraryLogger:
         rotating_file_handler = RotatingFileHandler(
             filename=filename,
             mode='a',
-            maxBytes=1024,
+            maxBytes=100 *1024 * 1024,
             backupCount=1,
             encoding='utf-8',
             delay=False
