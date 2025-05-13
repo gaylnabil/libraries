@@ -10,18 +10,34 @@ class KafkaAdmin:
         self.admin_client = AdminClient({"bootstrap.servers": bootstrap_servers})
 
     def get_topics(self, topic: str = None):
+        """
+        Get all topics or a single topic by name.
+        """
         try:
             metadata = self.admin_client.list_topics(topic)
+            
             logger.info(f"Fetched topics: {list(metadata.topics.keys())}", func_name=self.get_topics.__name__)
+            
             return metadata
+
         except Exception as e:
             logger.error(f"Error fetching topics: {e}", func_name=self.get_topics.__name__)
             raise KafkaException(e)
 
     def get_one_topic(self, topic):
-        return self.get_topics([topic])
+        """
+        Get a single topic by name.
+        """
+        try:
+            return self.get_topics([topic])
+        except Exception as e:
+            logger.error(f"Error fetching topic: {e}", func_name=self.get_one_topic.__name__)
+            raise KafkaException(e)
 
     def is_topic_exists(self, topic: str) -> bool:
+        """
+        Check if a topic exists.
+        """
         try:
             return topic in self.get_topics().topics.keys()
         except Exception as e:
