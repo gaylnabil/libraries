@@ -102,6 +102,14 @@ class BookService:
                 status_code=status.HTTP_404_NOT_FOUND,
                 message=f'Error: {e}'
             )
+    
+    async def books_count(self) -> Response:
+        """Count all books."""
+        try:
+            count = await self.books.count_documents({})
+            return Response(status_code=status.HTTP_200_OK, data=count)
+        except Exception as e:
+            return Response(status_code=status.HTTP_404_NOT_FOUND, message=f'Error: {e}')
 
     async def update(self, book_id: str, book_updated: Book) -> Response:
         """Update a book by its ID."""

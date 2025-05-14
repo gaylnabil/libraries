@@ -32,7 +32,7 @@ async def retrieve_book_by_id(book_id: str) -> JSONResponse:
         response = await book_service.find_by_id(book_id)
         if response.status_code == status.HTTP_200_OK:
             logger.info('Retrieved the book: %s', response.data, func_name=retrieve_book_by_id.__name__)
-            return response.data
+            return response
 
         logger.error('The book is not found', func_name=retrieve_book_by_id.__name__)
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='The book is not found')
@@ -47,7 +47,7 @@ async def get_books() -> JSONResponse:
         response = await book_service.find_all()
         if response.status_code == status.HTTP_200_OK:
             logger.info("Retrieved all orders successfully", func_name=get_books.__name__)
-            return response.data
+            return response
 
         logger.error("The orders are not found", func_name=get_books.__name__)
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='The orders are not found')
