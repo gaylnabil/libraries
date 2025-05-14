@@ -1,3 +1,11 @@
+import os
+
+# if os.getenv("DEBUG") == "True":
+#     import debugpy
+#     debugpy.listen(("0.0.0.0", 5678))
+#     print("⏳ Waiting for debugger attach on 0.0.0.0:5678...")
+#     debugpy.wait_for_client()
+
 from fastapi import FastAPI, status
 from fastapi.responses import RedirectResponse
 

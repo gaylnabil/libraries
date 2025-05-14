@@ -1,4 +1,5 @@
   services:
+    # FastAPI service
     library_fastapi:
       image: library_fastapi_img
       container_name: library_fastapi_c
@@ -11,13 +12,19 @@
         - "${FASTAPI_PORT}:${FASTAPI_PORT}"
         - "5678:5678"
 
-      command: uvicorn api:app --reload --host 0.0.0.0 --port 8000
-
+      # command: uvicorn api:app --reload --host 0.0.0.0 --port 8000
+      command: >
+        sh -c "echo '⏳ Waiting for debugger attach on 0.0.0.0:5678...';
+               python -m debugpy --listen ${FASTAPI_HOST}:5678 --wait-for-client -m uvicorn api:app --reload --host ${FASTAPI_HOST} --port ${FASTAPI_PORT}"
       depends_on:
         - mongodb_database
       environment:
-        - DEBUG=False
+        - DEBUG=${DEBUG_MODE}
+        - PYDEVD_DISABLE_FILE_VALIDATION=1
+        - -Xfrozen_modules=off
 
+
+    # MongoDB service
     mongodb_database:
       image: mongo
       restart: always
@@ -30,9 +37,9 @@
         # MONGO_INITDB_DATABASE: library
         MONGO_INITDB_ROOT_USERNAME: ${MONGO_USERNAME}
         MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD}
-      # env_file:
-      #   - .env
-    # Zookeeper and Kafka containers for Kafka and Zookeeper
+
+    
+    # Zookeeper and Kafka services for Kafka and Zookeeper
     zookeeper:
       image: confluentinc/cp-zookeeper:latest
       container_name: zookeeper_c
@@ -48,12 +55,12 @@
     kafka:
       image: confluentinc/cp-kafka:latest
       container_name: kafka_c
-      hostname: kafka
+      # hostname: kafka
       depends_on:
         - zookeeper
       ports:
-        - "${KAFKA_PORT}:${KAFKA_PORT}"
-        - "${KAFKA_PORT_2}:${KAFKA_PORT_2}"
+        - "9092:9092"
+        - "29092:29092"
       environment:
         KAFKA_BROKER_ID: 1
         KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
@@ -64,7 +71,7 @@
         # KAFKA_LISTENERS: PLAINTEXT://kafka1:29092,CONTROLLER://kafka1:29093,PLAINTEXT_HOST://0.0.0.0:9092
       networks:
         - kafka-network
-    
+
     # kafka-ui service
     kafka-ui:
       container_name: kafka-ui
@@ -80,6 +87,7 @@
         - kafka
       networks:
         - kafka-network
+
   networks:
     kafka-network:
       # name: kafka-network
