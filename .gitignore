@@ -6,7 +6,11 @@ mongodb/
 # C extensions
 *.so
 # Configuration files
-*.env
+**/.env
+# Environments
+.venv/
+env.bak/
+venv.bak/
 
 # Distribution / packaging
 .Python
@@ -122,11 +126,6 @@ celerybeat.pid
 
 # SageMath parsed files
 *.sage.py
-
-# Environments
-.venv
-env.bak
-venv.bak
 
 # Spyder project settings
 .spyderproject
