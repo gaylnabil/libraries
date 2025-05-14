@@ -5,6 +5,8 @@ __pycache__/
 mongodb/
 # C extensions
 *.so
+# Configuration files
+/**/*.env
 
 # Distribution / packaging
 .Python
@@ -122,6 +124,7 @@ celerybeat.pid
 *.sage.py
 
 # Environments
+/**/.venv/
 /**/env.bak/
 /**/venv.bak/
 
