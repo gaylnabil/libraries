@@ -3,7 +3,6 @@ __pycache__/
 *.py[cod]
 *$py.class
 mongodb/
-.venv/
 # C extensions
 *.so
 
@@ -123,11 +122,8 @@ celerybeat.pid
 *.sage.py
 
 # Environments
-FastAPI/.env
+.env
 .venv
-env/
-FastAPI/venv/
-ENV/
 env.bak/
 venv.bak/
 
