@@ -6,7 +6,7 @@ mongodb/
 # C extensions
 *.so
 # Configuration files
-/**/*.env
+**/*.env
 
 # Distribution / packaging
 .Python
